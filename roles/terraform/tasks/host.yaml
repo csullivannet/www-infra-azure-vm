@@ -1,0 +1,12 @@
+---
+
+- terraform:
+    project_path: './'
+    state: present
+    force_init: yes
+  register: terraform
+
+- name: Add host to inventory
+  add_host:
+      groups: www
+      name: "{{ terraform.outputs.instance_public_ip_addr.value }}"

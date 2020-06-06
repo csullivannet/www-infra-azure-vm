@@ -1,0 +1,42 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - README.md
+      - LICENCE
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout SCM
+      uses: actions/checkout@v2
+
+    - name: Install tools
+      run: |
+        python3 -m pip install --upgrade --force-reinstall pip
+        pip3 install --upgrade setuptools
+        pip3 install wheel
+        pip3 install --requirement requirements.txt
+        wget --quiet --output-document terraform.zip \
+          https://releases.hashicorp.com/terraform/0.12.26/terraform_0.12.26_linux_amd64.zip
+        unzip -q -d $HOME/bin terraform.zip
+
+    - name: Deploy
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.azureSubscriptionID }}
+        ARM_TENANT_ID: ${{ secrets.azureTenantID }}
+        ARM_CLIENT_ID: ${{ secrets.azureClientID }}
+        ARM_CLIENT_SECRET: ${{ secrets.azureClientSecret }}
+        ANSIBLE_HOST_KEY_CHECKING: False
+      run: |
+        az login --service-principal \
+          --username $ARM_CLIENT_ID \
+          --password $ARM_CLIENT_SECRET \
+          --tenant $ARM_TENANT_ID
+        ansible-playbook \
+          -e 'ansible_python_interpreter=/usr/bin/python3' \
+          ansible-playbook.yaml

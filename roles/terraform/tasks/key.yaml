@@ -1,0 +1,25 @@
+---
+
+# Fetch SSH key from a pregenerated vault.
+
+- name: Get private key
+  command: az keyvault secret show --vault-name www-key-vault --name id-azure
+  register: private
+  changed_when: false
+
+- name: Write private key
+  copy:
+    content: "{{ (private.stdout | from_json).value }}"
+    dest: id_azure
+    mode: "0600"
+
+- name: Get public key
+  command: ssh-keygen -y -f id_azure
+  register: public
+  changed_when: false
+
+- name: Write public key
+  copy:
+    content: "{{ public.stdout }}"
+    dest: id_azure.pub
+    mode: "0600"
