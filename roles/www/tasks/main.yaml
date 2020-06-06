@@ -1,5 +1,22 @@
 ---
 
+# Disable IPv6 stack - this is a common issue causing apt to slow down.
+- block:
+    - sysctl:
+        name: net.ipv6.conf.all.disable_ipv6
+        value: '1'
+        sysctl_set: yes
+
+    - sysctl:
+        name: net.ipv6.conf.default.disable_ipv6
+        value: '1'
+        sysctl_set: yes
+
+    - sysctl:
+        name: net.ipv6.conf.lo.disable_ipv6
+        value: '1'
+        sysctl_set: yes
+
 - apt:
     update_cache: yes
 
@@ -13,3 +30,18 @@
 - service:
     name: nginx
     state: started
+
+- delegate_to: localhost
+  become: no
+  azure_rm_storageblob:
+    resource_group: www-static
+    storage_account_name: wwwstaticstorage
+    container: www
+    blob: site.tgz
+    dest: /tmp/site.tgz
+
+- unarchive:
+    src: /tmp/site.tgz
+    dest: /var/www/html
+    extra_opts:
+      - --strip-components=1

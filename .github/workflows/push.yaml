@@ -1,5 +1,9 @@
+---
+
 name: Deploy
 on:
+  repository_dispatch:
+    types: [www-push]
   push:
     branches:
       - master
