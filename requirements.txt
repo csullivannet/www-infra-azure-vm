@@ -45,7 +45,7 @@ cryptography==2.9.2
 humanfriendly==8.2
 idna==2.9
 isodate==0.6.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 jmespath==0.10.0
 knack==0.3.3
 MarkupSafe==1.1.1
